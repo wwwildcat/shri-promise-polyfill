@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<head>
+    <title>Проверка промисов</title>
+</head>
+<body>
+    <button id="prom-button1">Создать Promise</button>
+    <button id="prom-button2">Создать еще один Promise</button>
+    <div id="log"></div>
+    <script src="promise-polyfill.js"></script>
+    <script>
+        function testPromise() { //Функция-пример из описания домашнего задания
+            var promise = new Promise(function (resolve){
+                resolve(42);
+        });
+
+        promise
+            .then(function (value) {
+                return value + 1
+            })
+            .then(function (value) {
+                log.insertAdjacentHTML('beforebegin', value + ' '); // 43
+                return new Promise(function (resolve) { resolve(137) })
+            }) 
+            .then(function (value) {
+                log.insertAdjacentHTML('beforebegin', value + ' '); // 137
+                throw new Error()
+            })
+            .then(
+                function () { log.insertAdjacentHTML('beforebegin', 'Будет проигнорировано') },
+                function () { return 'ошибка обработана' }
+            )
+            .then(function (value) {
+                log.insertAdjacentHTML('beforebegin', value) // "ошибка обработана"
+            }) 
+        }
+        var promiseCount = 0;
+        function testPromise2() { //Функция-пример из описания Promise на MDN
+            var thisPromiseCount = ++promiseCount;
+
+            var log = document.getElementById('log');
+            log.insertAdjacentHTML('beforeend', thisPromiseCount + ') Запуск (запуск синхронного кода)');
+
+             var p1 = new Promise(
+    
+            function(resolve, reject) {       
+                log.insertAdjacentHTML('beforeend', thisPromiseCount + ') Запуск обещания (запуск асинхронного кода)');
+                window.setTimeout(
+                    function() {
+                        resolve(thisPromiseCount)
+                    }, Math.random() * 2000 + 1000);
+            });
+
+            p1.then (function(val) {
+                log.insertAdjacentHTML('beforeend', val + ') Обещание выполнено (асинхронный код завершён)');
+            });
+
+            log.insertAdjacentHTML('beforeend', thisPromiseCount + ') Обещание создано (синхронный код завершён)');
+        } 
+
+
+        if ("Promise" in window) {
+            let btn1 = document.getElementById("prom-button1");
+            btn1.addEventListener("click",testPromise);
+            let btn2 = document.getElementById("prom-button2");
+            btn2.addEventListener("click",testPromise2);
+        } else {
+            log = document.getElementById('log');
+            log.innerHTML = "Демонстрация невозможна, поскольку ваш браузер не поддерживает интерфейс <code>Promise<code>.";
+        }
+    </script>
+</body>
